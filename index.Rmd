@@ -1,0 +1,65 @@
+---
+title: "Rmarkdown and Plotly"
+author: "Pablo Rosales"
+date: "12/13/2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, echo = FALSE}
+# Libraries
+library(sqldf)
+library(plotly)
+
+# Datasets Load
+
+graduates_degrees_df <- read.csv("/Users/prosales/Documents/Personales/09 - Developing Data Products/assignments/censo.csv")
+study_area_df <- read.csv("/Users/prosales/Documents/Personales/09 - Developing Data Products/assignments/area_2.csv")
+
+# Datasets preparation
+masters_by_area_df <- sqldf("SELECT area AS Masters_Degree_Area, COUNT(*) FROM graduates_degrees_df AS grad, study_area_df AS area WHERE grad.area_estudio_maestria = area.id GROUP BY area ORDER BY 2 DESC")
+colnames(masters_by_area_df) <- c("Masters_Degree_Area", "count")
+
+phd_by_area_df <- sqldf("SELECT area AS Doctors_Degree_Area, COUNT(*) FROM graduates_degrees_df AS grad, study_area_df AS area WHERE grad.area_doctorado_actual = area.id GROUP BY area ORDER BY 2 DESC")
+colnames(phd_by_area_df ) <- c("Doctors_Degree_Area", "count")
+```
+
+
+## Masters Degrees by Field of Study
+
+```{r echo = FALSE}
+
+# plot 1:  Masters by Field of Study
+plot_ly (
+  x = masters_by_area_df$Masters_Degree_Area, 
+  y = masters_by_area_df$count,
+  name = "Masters by Field of Study",
+  type = "bar",
+  text = masters_by_area_df$count,
+  textposition = "auto",
+  marker = list(
+    color = 'rgb(158,202,225)',
+    line = list(color = 'rgb(8,48,107)', width = 1.5)
+  )    
+) %>% layout (
+    title = "Masters Degrees by Field of Study"
+)  
+```
+
+
+## PHD Degrees by Field of Study
+```{r echo = FALSE}
+  phd_by_area_df %>% plot_ly (labels = ~Doctors_Degree_Area, values = ~count) %>%
+  add_pie(hole = 0.6) %>%
+  layout (
+    title = "Phd Degrees by Field of Study", showlegend = T,
+    xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
+    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE)
+  )
+```
+
+
+## Thank you !
